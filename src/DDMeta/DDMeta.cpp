@@ -40,7 +40,7 @@ int DDMeta::open(int opts, int flags, const char *name) {
 //---------------------------------------------------------------------------
 
 int DDMeta::read(int handle, int flags, int reg, int count, byte *buf) {
-  byte versionBuffer[RESPONSE_BUFFER_SIZE];
+  byte versionBuffer[DEVICE_RESPONSE_BUFFER_SIZE];
 
   // First, handle registers that can be processed by the DeviceDriver base
   // class without knowing very much about our particular device type.
@@ -63,15 +63,15 @@ int DDMeta::read(int handle, int flags, int reg, int count, byte *buf) {
 
   case (int)(REG::DRIVER_VERSION_LIST):
     for (int idx=0; idx<gDeviceTable->deviceCount; idx++) {
-      status = gDeviceTable->read(makeHandle(idx,0), flags, (int)(CDR::DriverVersion), RESPONSE_BUFFER_SIZE, versionBuffer);
-      gDeviceTable->cr->reportRead(status, handle, flags, (int)(CDR::DriverVersion), RESPONSE_BUFFER_SIZE, versionBuffer);
+      status = gDeviceTable->read(makeHandle(idx,0), flags, (int)(CDR::DriverVersion), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
+      gDeviceTable->cr->reportRead(status, handle, flags, (int)(CDR::DriverVersion), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
     }
     return ESUCCESS;
 
   case (int)(REG::UNIT_NAME_PREFIX_LIST):
     for (int idx=0; idx<gDeviceTable->deviceCount; idx++) {
-      status = gDeviceTable->read(makeHandle(idx,0), flags, (int)(CDR::UnitNamePrefix), RESPONSE_BUFFER_SIZE, versionBuffer);
-      gDeviceTable->cr->reportRead(status, handle, flags, (int)(CDR::UnitNamePrefix), RESPONSE_BUFFER_SIZE, versionBuffer);
+      status = gDeviceTable->read(makeHandle(idx,0), flags, (int)(CDR::UnitNamePrefix), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
+      gDeviceTable->cr->reportRead(status, handle, flags, (int)(CDR::UnitNamePrefix), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
     }
     return ESUCCESS;
 }
@@ -159,7 +159,7 @@ int DDMeta::processTimerEvent(int lun, int timerSelector, ClientReporter *report
       int h = cU->eventAction[1].handle;
       int f = cU->eventAction[1].flags;
       int r = cU->eventAction[1].reg;
-      int c = min(cU->eventAction[1].count,RESPONSE_BUFFER_SIZE);
+      int c = min(cU->eventAction[1].count,DEVICE_RESPONSE_BUFFER_SIZE);
 
       if (cU->eventAction[1].enabled) {
         if ((cU->eventAction[1].action & 0xF) == (int)(DAC::READ))  {

@@ -25,8 +25,8 @@ public:
     int flags;              /**< The value of the flags argument for the call */
     int reg;                /**< The device register number for the call */
     int count;              /**< The number of bytes to be read or written */
-    byte queryBuffer[QUERY_BUFFER_SIZE];  /**< The outgoing (query) buffer */
-    byte responseBuffer[RESPONSE_BUFFER_SIZE];  /**< The incoming (response) buffer */
+    byte queryBuffer[DEVICE_QUERY_BUFFER_SIZE];  /**< The outgoing (query) buffer */
+    byte responseBuffer[DEVICE_RESPONSE_BUFFER_SIZE];  /**< The incoming (response) buffer */
   };
 
 

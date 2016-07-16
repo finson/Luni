@@ -4,8 +4,8 @@
 // Define constants, macros, and enums that are useful throughout the device
 // driver framework.
 
-#define QUERY_BUFFER_SIZE 32
-#define RESPONSE_BUFFER_SIZE 32
+#define DEVICE_QUERY_BUFFER_SIZE 32
+#define DEVICE_RESPONSE_BUFFER_SIZE 32
 
 #define MINIMUM_UPDATE_INTERVAL 100    // microseconds
 #define DEFAULT_UPDATE_INTERVAL 200

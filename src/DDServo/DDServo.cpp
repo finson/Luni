@@ -246,7 +246,7 @@ int DDServo::processTimerEvent(int lun, int timerSelector, ClientReporter *repor
   int h = cU->eventAction[1].handle;
   int f = cU->eventAction[1].flags;
   int r = cU->eventAction[1].reg;
-  int c = min(cU->eventAction[1].count,QUERY_BUFFER_SIZE);
+  int c = min(cU->eventAction[1].count,DEVICE_QUERY_BUFFER_SIZE);
 
   // Is it time to do another write?
   // If so, calculate new position and set it.

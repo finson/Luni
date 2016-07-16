@@ -144,7 +144,7 @@ int DDHello::processTimerEvent(int lun, int timerSelector, ClientReporter *repor
   int h = cU->eventAction[1].handle;
   int f = cU->eventAction[1].flags;
   int r = cU->eventAction[1].reg;
-  int c = min(cU->eventAction[1].count,RESPONSE_BUFFER_SIZE);
+  int c = min(cU->eventAction[1].count,DEVICE_RESPONSE_BUFFER_SIZE);
 
   if (timerSelector == 1) {
     if (cU->eventAction[1].enabled) {

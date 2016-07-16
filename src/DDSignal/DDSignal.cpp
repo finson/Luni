@@ -235,7 +235,7 @@ int DDSignal::processTimerEvent(int lun, int timerSelector, ClientReporter *repo
   int h = currentUnit->eventAction[1].handle;
   int f = currentUnit->eventAction[1].flags;
   int r = currentUnit->eventAction[1].reg;
-  int c = min(currentUnit->eventAction[1].count,RESPONSE_BUFFER_SIZE);
+  int c = min(currentUnit->eventAction[1].count,DEVICE_RESPONSE_BUFFER_SIZE);
 
   // Is it time to do another read?
 
