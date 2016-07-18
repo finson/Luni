@@ -47,17 +47,17 @@ int DDHello::read(int handle, int flags, int reg, int count, byte *buf) {
     return status;
   }
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUHello *currentUnit = static_cast<LUHello *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
 
   // Enable continuous read, if requested
 
-  if (flags == (int)DAF::MILLI_RUN) {
-    DeviceDriver::milliRateRun((int)DAC::READ, handle, flags, reg, count,buf);
-  } else if (flags == (int)DAF::MILLI_STOP) {
-    DeviceDriver::milliRateStop((int)DAC::READ, handle, flags, reg, count,buf);
+  if (flags == (int)DeviceConstants::DAF::MILLI_RUN) {
+    DeviceDriver::milliRateRun((int)DeviceConstants::DAC::READ, handle, flags, reg, count,buf);
+  } else if (flags == (int)DeviceConstants::DAF::MILLI_STOP) {
+    DeviceDriver::milliRateStop((int)DeviceConstants::DAC::READ, handle, flags, reg, count,buf);
   }
 
   //  Second, handle registers that can only be processed if an open has been
@@ -65,7 +65,7 @@ int DDHello::read(int handle, int flags, int reg, int count, byte *buf) {
 
   switch (reg) {
 
-  case (int)(CDR::Stream):
+  case (int)(DeviceConstants::CDR::Stream):
     if ((size_t)count >= (strlen(currentUnit->getWho()) + strlen(currentUnit->getWhat()) + 4)) {
       buf[0] = (uint8_t)'\0';
       strcat((char *)buf, currentUnit->getWhat());
@@ -103,7 +103,7 @@ int DDHello::write(int handle, int flags, int reg, int count, byte *buf) {
   //  Second, handle registers that can only be processed if an open has been
   //  performed and there is an LUSignal object associated with the lun.
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUHello *currentUnit = static_cast<LUHello *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -125,7 +125,7 @@ int DDHello::write(int handle, int flags, int reg, int count, byte *buf) {
 }
 
 int DDHello::close(int handle, int flags) {
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUHello *currentUnit = static_cast<LUHello *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -138,7 +138,7 @@ int DDHello::close(int handle, int flags) {
 
 int DDHello::processTimerEvent(int lun, int timerSelector, ClientReporter *report) {
 
-  LogicalUnitInfo *cU = logicalUnits[getUnitNumber(lun)];
+  LogicalUnitInfo *cU = logicalUnits[getUnitNumberFromHandle(lun)];
   if (cU == 0) return ENOTCONN;
 
   int h = cU->eventAction[1].handle;
@@ -148,7 +148,7 @@ int DDHello::processTimerEvent(int lun, int timerSelector, ClientReporter *repor
 
   if (timerSelector == 1) {
     if (cU->eventAction[1].enabled) {
-      if ((cU->eventAction[1].action & 0xF) == (int)(DAC::READ))  {
+      if ((cU->eventAction[1].action & 0xF) == (int)(DeviceConstants::DAC::READ))  {
         int status = gDeviceTable->read(h,f,r,c,cU->eventAction[1].responseBuffer);
         report->reportRead(status, h, f, r, c, (const byte *)(cU->eventAction[1].responseBuffer));
         return status;

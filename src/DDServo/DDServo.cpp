@@ -74,7 +74,7 @@ int DDServo::read(int handle, int flags, int reg, int count, byte *buf) {
     return status;
   }
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUServo *currentUnit = static_cast<LUServo *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -135,7 +135,7 @@ int DDServo::write(int handle, int flags, int reg, int count, byte *buf) {
   //  Second, handle registers that can only be processed if an open has been
   //  performed and there is an LUServo object associated with the lun.
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUServo *currentUnit = static_cast<LUServo *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -169,12 +169,12 @@ int DDServo::write(int handle, int flags, int reg, int count, byte *buf) {
 
   // Enable continuous write, if requested
 
-  if (flags == (int)DAF::MILLI_RUN) {
+  if (flags == (int)DeviceConstants::DAF::MILLI_RUN) {
     currentUnit->pulseIncrement = (currentUnit->maxPulse-currentUnit->minPulse) / currentUnit->stepCount;
     currentUnit->currentStep = 0;
-    DeviceDriver::milliRateRun((int)DAC::WRITE, handle, flags, reg, count,buf);
-  } else if (flags == (int)DAF::MILLI_STOP) {
-    DeviceDriver::milliRateStop((int)DAC::WRITE, handle, flags, reg, count,buf);
+    DeviceDriver::milliRateRun((int)DeviceConstants::DAC::WRITE, handle, flags, reg, count,buf);
+  } else if (flags == (int)DeviceConstants::DAF::MILLI_STOP) {
+    DeviceDriver::milliRateStop((int)DeviceConstants::DAC::WRITE, handle, flags, reg, count,buf);
   }
 
   switch (reg) {
@@ -213,7 +213,7 @@ int DDServo::write(int handle, int flags, int reg, int count, byte *buf) {
 //---------------------------------------------------------------------------
 
 int DDServo::close(int handle, int flags) {
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUServo *currentUnit = static_cast<LUServo *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -240,7 +240,7 @@ int DDServo::processTimerEvent(int lun, int timerSelector, ClientReporter *repor
   int nextPulse;
   int status;
 
-  LUServo *cU = static_cast<LUServo *>(logicalUnits[getUnitNumber(lun)]);
+  LUServo *cU = static_cast<LUServo *>(logicalUnits[getUnitNumberFromHandle(lun)]);
   if (cU == 0) return ENOTCONN;
 
   int h = cU->eventAction[1].handle;
@@ -252,7 +252,7 @@ int DDServo::processTimerEvent(int lun, int timerSelector, ClientReporter *repor
   // If so, calculate new position and set it.
 
   if ((timerSelector == 1) && (cU->eventAction[1].enabled)) {
-    if ((cU->eventAction[1].action) == (int)(DAC::WRITE))  {
+    if ((cU->eventAction[1].action) == (int)(DeviceConstants::DAC::WRITE))  {
       switch (cU->eventAction[1].reg) {
       case (int)(REG::POSITION_MICROSECONDS):
         nextStep = cU->currentStep + cU->stepIncrement;

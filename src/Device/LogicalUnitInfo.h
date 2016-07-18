@@ -2,7 +2,7 @@
 #define LogicalUnitInfo_h
 
 #include <arduino.h>
-#include "DeviceDefine.h"
+#include "DeviceConstants.h"
 
 class LogicalUnitInfo {
 

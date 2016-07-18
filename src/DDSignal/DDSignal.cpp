@@ -25,7 +25,7 @@ int DDSignal::open(int opts, int flags, const char *name) {
     return status;
   }
 
-  lun = getUnitNumber(status);
+  lun = getUnitNumberFromHandle(status);
   LUSignal *currentUnit = new LUSignal();
   if (currentUnit == 0) {
     return ENOMEM;
@@ -52,17 +52,17 @@ int DDSignal::read(int handle, int flags, int reg, int count, byte *buf) {
     return status;
   }
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUSignal *currentUnit = static_cast<LUSignal *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
 
   // Enable continuous read, if requested
 
-  if (flags == (int)DAF::MILLI_RUN) {
-    DeviceDriver::milliRateRun((int)DAC::READ, handle, flags, reg, count,buf);
-  } else if (flags == (int)DAF::MILLI_STOP) {
-    DeviceDriver::milliRateStop((int)DAC::READ, handle, flags, reg, count,buf);
+  if (flags == (int)DeviceConstants::DAF::MILLI_RUN) {
+    DeviceDriver::milliRateRun((int)DeviceConstants::DAC::READ, handle, flags, reg, count,buf);
+  } else if (flags == (int)DeviceConstants::DAF::MILLI_STOP) {
+    DeviceDriver::milliRateStop((int)DeviceConstants::DAC::READ, handle, flags, reg, count,buf);
   }
 
   //  Second, handle registers that can only be processed if an open has been
@@ -113,22 +113,22 @@ int DDSignal::write(int handle, int flags, int reg, int count, byte *buf) {
   //  Second, handle registers that can only be processed if an open has been
   //  performed and there is an LUSignal object associated with the lun.
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUSignal *currentUnit = static_cast<LUSignal *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
 
   // Enable continuous write, if requested
 
-  if (flags == (int)DAF::MILLI_RUN) {
-    DeviceDriver::milliRateRun((int)DAC::WRITE, handle, flags, reg, count,buf);
-  } else if (flags == (int)DAF::MILLI_STOP) {
-    DeviceDriver::milliRateStop((int)DAC::WRITE, handle, flags, reg, count,buf);
+  if (flags == (int)DeviceConstants::DAF::MILLI_RUN) {
+    DeviceDriver::milliRateRun((int)DeviceConstants::DAC::WRITE, handle, flags, reg, count,buf);
+  } else if (flags == (int)DeviceConstants::DAF::MILLI_STOP) {
+    DeviceDriver::milliRateStop((int)DeviceConstants::DAC::WRITE, handle, flags, reg, count,buf);
   }
 
   switch (reg) {
 
-  case (int)(CDR::Configure):
+  case (int)(DeviceConstants::CDR::Configure):
     if (count < 5) return EMSGSIZE;
     bufIndex = 0;
     currentUnit->direction = from8LEToHost(buf+bufIndex++);
@@ -209,7 +209,7 @@ int DDSignal::write(int handle, int flags, int reg, int count, byte *buf) {
 //---------------------------------------------------------------------------
 
 int DDSignal::close(int handle, int flags) {
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUSignal *currentUnit = static_cast<LUSignal *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -229,7 +229,7 @@ int DDSignal::close(int handle, int flags) {
 int DDSignal::processTimerEvent(int lun, int timerSelector, ClientReporter *report) {
   int status;
 
-  LUSignal *currentUnit = static_cast<LUSignal *>(logicalUnits[getUnitNumber(lun)]);
+  LUSignal *currentUnit = static_cast<LUSignal *>(logicalUnits[getUnitNumberFromHandle(lun)]);
   if (currentUnit == 0) return ENOTCONN;
 
   int h = currentUnit->eventAction[1].handle;
@@ -240,7 +240,7 @@ int DDSignal::processTimerEvent(int lun, int timerSelector, ClientReporter *repo
   // Is it time to do another read?
 
   if ((timerSelector == 1) && (currentUnit->eventAction[1].enabled)) {
-    if ((currentUnit->eventAction[1].action && 0xF) == (int)(DAC::READ))  {
+    if ((currentUnit->eventAction[1].action && 0xF) == (int)(DeviceConstants::DAC::READ))  {
         status = gDeviceTable->read(h, f, r, c, currentUnit->eventAction[1].responseBuffer);
         report->reportRead(status, h, f, r, c,  currentUnit->eventAction[1].responseBuffer);
         return status;

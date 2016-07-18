@@ -17,7 +17,7 @@
 #include "Boards.h"
 #include "LogicalUnitInfo.h"
 #include "DeviceError.h"
-#include "DeviceDefine.h"
+#include "DeviceConstants.h"
 
 class ClientReporter;
 class DeviceTable;

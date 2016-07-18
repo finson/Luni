@@ -51,7 +51,7 @@ int DeviceDriver::open(int opts, int flags, const char *name) {
     return lun;
   }
 
-  if (flags == (int)(DAF::FORCE)) {
+  if (flags == (int)(DeviceConstants::DAF::FORCE)) {
     delete logicalUnits[lun];
     return lun;
   } else {
@@ -88,9 +88,9 @@ int DeviceDriver::read(int handle, int flags, int reg, int count, byte *buf) {
    // the rules about open() and close().
 
   switch (reg) {
-  case (int)(CDR::DriverVersion):
+  case (int)(DeviceConstants::CDR::DriverVersion):
     return buildVersionResponse(count, buf);
-  case (int)(CDR::UnitNamePrefix):
+  case (int)(DeviceConstants::CDR::UnitNamePrefix):
       return buildPrefixResponse(count,buf);
   }
 
@@ -98,13 +98,13 @@ int DeviceDriver::read(int handle, int flags, int reg, int count, byte *buf) {
   //  been done) but we don't need to have any detailed info about the
   //  unit itself beyond that contained in the LogicalUnitInfo base class.
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LogicalUnitInfo *currentUnit = static_cast<LogicalUnitInfo *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
 
   switch (reg) {
-  case (int)(CDR::Intervals):
+  case (int)(DeviceConstants::CDR::Intervals):
     if (count < 8) return EMSGSIZE;
     fromHostTo32LE(currentUnit->intervalTime[0], &buf[0]);
     fromHostTo32LE(currentUnit->intervalTime[1], &buf[4]);
@@ -148,13 +148,13 @@ int DeviceDriver::write(int handle, int flags, int reg, int count, byte *buf) {
   //  been done) but we don't need to have any detailed info about the
   //  unit itself beyond that contained in the LogicalUnitInfo base class.
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LogicalUnitInfo *currentUnit = static_cast<LogicalUnitInfo *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
 
   switch (reg) {
-  case (int)(CDR::Intervals):
+  case (int)(DeviceConstants::CDR::Intervals):
     if (count < 8) return EMSGSIZE;
     currentUnit->intervalTime[0] = from32LEToHost(&buf[0]);
     currentUnit->intervalTime[1] = from32LEToHost(&buf[4]);
@@ -183,7 +183,7 @@ int DeviceDriver::write(int handle, int flags, int reg, int count, byte *buf) {
  */
 int DeviceDriver::close(int handle, int flags) {
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LogicalUnitInfo *currentUnit = static_cast<LogicalUnitInfo *>(logicalUnits[lun]);
 
@@ -331,13 +331,13 @@ int DeviceDriver::milliRateStop(int action, int handle, int flags, int reg, int 
 }
 
 int DeviceDriver::timerRateRun(int timerSelector,int action, int handle, int flags, int reg, int count, byte *buf) {
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LogicalUnitInfo *currentUnit = logicalUnits[lun];
   if (currentUnit == 0) return ENOTCONN;
 
   if (timerSelector != 0 && timerSelector != 1) return EINVAL;
-  if (flags != (int)(DAF::MILLI_RUN) && flags != (int)(DAF::MICRO_RUN)) return EINVAL;
+  if (flags != (int)(DeviceConstants::DAF::MILLI_RUN) && flags != (int)(DeviceConstants::DAF::MICRO_RUN)) return EINVAL;
 
   currentUnit->eventAction[timerSelector].action = action;
   currentUnit->eventAction[timerSelector].handle = handle;
@@ -349,13 +349,13 @@ int DeviceDriver::timerRateRun(int timerSelector,int action, int handle, int fla
 }
 
 int DeviceDriver::timerRateStop(int timerSelector, int action, int handle, int flags, int reg, int count, byte *buf) {
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LogicalUnitInfo *currentUnit = logicalUnits[lun];
   if (currentUnit == 0) return ENOTCONN;
 
   if (timerSelector != 0 && timerSelector != 1) return EINVAL;
-  if (flags != (int)(DAF::MILLI_STOP) && flags != (int)(DAF::MICRO_STOP)) return EINVAL;
+  if (flags != (int)(DeviceConstants::DAF::MILLI_STOP) && flags != (int)(DeviceConstants::DAF::MICRO_STOP)) return EINVAL;
 
   currentUnit->eventAction[timerSelector].enabled = false;
   return ESUCCESS;

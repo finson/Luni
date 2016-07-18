@@ -65,26 +65,26 @@ int DeviceTable::open(int opts, int flags, const char *name) {
     }
   }
   if (status >= 0) {
-    return makeHandle(deviceIndex, status);
+    return makeDeviceHandle(deviceIndex, status);
   } else {
     return status;
   }
 }
 
 int DeviceTable::read(int handle, int flags, int reg, int count, byte *buf) {
-  int deviceIndex = getDeviceNumber(handle);
+  int deviceIndex = getDeviceNumberFromHandle(handle);
   if (deviceIndex < 0 || deviceIndex >= deviceCount) return EINVAL;
   return devices[deviceIndex]->read(handle, flags, reg, count, buf);
 }
 
 int DeviceTable::write(int handle, int flags, int reg, int count, byte *buf) {
-  int deviceIndex = getDeviceNumber(handle);
+  int deviceIndex = getDeviceNumberFromHandle(handle);
   if (deviceIndex < 0 || deviceIndex >= deviceCount) return EINVAL;
   return devices[deviceIndex]->write(handle, flags, reg, count, buf);
 }
 
 int DeviceTable::close(int handle, int flags) {
-  int deviceIndex = getDeviceNumber(handle);
+  int deviceIndex = getDeviceNumberFromHandle(handle);
   if (deviceIndex < 0 || deviceIndex >= deviceCount) return EINVAL;
   return devices[deviceIndex]->close(handle, flags);
 }

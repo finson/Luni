@@ -63,32 +63,32 @@ int DDMeta::read(int handle, int flags, int reg, int count, byte *buf) {
 
   case (int)(REG::DRIVER_VERSION_LIST):
     for (int idx=0; idx<gDeviceTable->deviceCount; idx++) {
-      status = gDeviceTable->read(makeHandle(idx,0), flags, (int)(CDR::DriverVersion), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
-      gDeviceTable->cr->reportRead(status, handle, flags, (int)(CDR::DriverVersion), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
+      status = gDeviceTable->read(makeDeviceHandle(idx,0), flags, (int)(DeviceConstants::CDR::DriverVersion), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
+      gDeviceTable->cr->reportRead(status, handle, flags, (int)(DeviceConstants::CDR::DriverVersion), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
     }
     return ESUCCESS;
 
   case (int)(REG::UNIT_NAME_PREFIX_LIST):
     for (int idx=0; idx<gDeviceTable->deviceCount; idx++) {
-      status = gDeviceTable->read(makeHandle(idx,0), flags, (int)(CDR::UnitNamePrefix), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
-      gDeviceTable->cr->reportRead(status, handle, flags, (int)(CDR::UnitNamePrefix), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
+      status = gDeviceTable->read(makeDeviceHandle(idx,0), flags, (int)(DeviceConstants::CDR::UnitNamePrefix), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
+      gDeviceTable->cr->reportRead(status, handle, flags, (int)(DeviceConstants::CDR::UnitNamePrefix), DEVICE_RESPONSE_BUFFER_SIZE, versionBuffer);
     }
     return ESUCCESS;
 }
 
   // Third, deal with connection-required requests
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUMeta *currentUnit = static_cast<LUMeta *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
 
   // Take action regarding continuous read, if requested
 
-  if (flags == (int)DAF::MILLI_RUN) {
-    DeviceDriver::milliRateRun((int)DAC::READ, handle, flags, reg, count);
-  } else if (flags == (int)DAF::MILLI_STOP) {
-    DeviceDriver::milliRateStop((int)DAC::READ, handle, flags, reg, count);
+  if (flags == (int)DeviceConstants::DAF::MILLI_RUN) {
+    DeviceDriver::milliRateRun((int)DeviceConstants::DAC::READ, handle, flags, reg, count);
+  } else if (flags == (int)DeviceConstants::DAF::MILLI_STOP) {
+    DeviceDriver::milliRateStop((int)DeviceConstants::DAC::READ, handle, flags, reg, count);
   }
 
   switch (reg) {
@@ -115,7 +115,7 @@ int DDMeta::write(int handle, int flags, int reg, int count, byte *buf) {
   //  Second, handle registers that can only be processed if an open has been
   //  performed and there is an LUMeta object associated with the lun.
 
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUMeta *currentUnit = static_cast<LUMeta *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -128,7 +128,7 @@ int DDMeta::write(int handle, int flags, int reg, int count, byte *buf) {
 }
 
 int DDMeta::close(int handle, int flags) {
-  int lun = getUnitNumber(handle);
+  int lun = getUnitNumberFromHandle(handle);
   if (lun < 0 || lun >= logicalUnitCount) return EINVAL;
   LUMeta *currentUnit = static_cast<LUMeta *>(logicalUnits[lun]);
   if (currentUnit == 0) return ENOTCONN;
@@ -142,7 +142,7 @@ int DDMeta::close(int handle, int flags) {
 
 int DDMeta::processTimerEvent(int lun, int timerSelector, ClientReporter *report) {
 
-  LUMeta *cU = static_cast<LUMeta *>(logicalUnits[getUnitNumber(lun)]);
+  LUMeta *cU = static_cast<LUMeta *>(logicalUnits[getUnitNumberFromHandle(lun)]);
   if (cU == 0) return ENOTCONN;
 
   switch (timerSelector) {
@@ -162,7 +162,7 @@ int DDMeta::processTimerEvent(int lun, int timerSelector, ClientReporter *report
       int c = min(cU->eventAction[1].count,DEVICE_RESPONSE_BUFFER_SIZE);
 
       if (cU->eventAction[1].enabled) {
-        if ((cU->eventAction[1].action & 0xF) == (int)(DAC::READ))  {
+        if ((cU->eventAction[1].action & 0xF) == (int)(DeviceConstants::DAC::READ))  {
           int status = gDeviceTable->read(h,f,r,c,cU->eventAction[1].responseBuffer);
           report->reportRead(status, h, f, r, c, (const byte *)(cU->eventAction[1].responseBuffer));
           return status;
@@ -181,7 +181,7 @@ int DDMeta::processTimerEvent(int lun, int timerSelector, ClientReporter *report
 
 int DDMeta::readATI(int handle, int flags, int reg, int count, byte *buf) {
   unsigned long avg;
-  LUMeta *cU = static_cast<LUMeta *>(logicalUnits[getUnitNumber(handle)]);
+  LUMeta *cU = static_cast<LUMeta *>(logicalUnits[getUnitNumberFromHandle(handle)]);
   if (cU == 0) return ENOTCONN;
 
   if (count < 8) return EMSGSIZE;
