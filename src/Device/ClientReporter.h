@@ -2,7 +2,7 @@
 #define ClientReporter_h
 
 #include <Device/DeviceDriver.h>
-#include <arduino.h>
+#include <Arduino.h>
 
 /**
  * This abstract class declares method signatures for any class that would like

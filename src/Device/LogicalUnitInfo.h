@@ -1,7 +1,7 @@
 #ifndef LogicalUnitInfo_h
 #define LogicalUnitInfo_h
 
-#include <arduino.h>
+#include <Arduino.h>
 #include "DeviceDefine.h"
 
 class LogicalUnitInfo {
