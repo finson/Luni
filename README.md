@@ -1,8 +1,8 @@
-##LuniLib
+## LuniLib
 
-###An Arduino library to enable the creation and use of device driver modules with local and remote access.
+### An Arduino library to enable the creation and use of device driver modules with local and remote access.
 
-####Summary
+#### Summary
 
 LuniLib implements a framework for device drivers for use on the Arduino.
 
